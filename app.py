@@ -45,7 +45,7 @@ if page == "Home":
     """)
 
 elif page == "Event Study Dashboard":
-    from Pages import event_study
+    import Pages.event_study 
 
 elif page == "Report":
-    from Pages import report
+    import Pages.report
