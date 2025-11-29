@@ -4,7 +4,10 @@ import yfinance as yf
 import datetime as dt
 import altair as alt
 
-st.set_page_config(layout="wide")
+def show_event_study():
+
+    st.title("Event Study Dashboard")
+
 
 # --------------------------------------------------------------
 # NATURAL DISASTERS + DATES  
