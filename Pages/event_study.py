@@ -4,8 +4,6 @@ import yfinance as yf
 import datetime as dt
 import altair as alt
 
-def show_event_study():
-
 # --------------------------------------------------------------
 # NATURAL DISASTERS + DATES  
 # (with emojis instead of confirm dropdown hack)
@@ -49,6 +47,7 @@ FIXED_WINDOW = 20     # Fixed: T-20 to T+20
 # --------------------------------------------------------------
 # HOME PAGE
 # --------------------------------------------------------------
+def show_event_study():
     st.title("Natural Disaster Impact on U.S. Utility Industries")
     st.write("""
         This dashboard explores **how different utility-related industries reacted to major U.S. natural disasters**.
@@ -75,7 +74,6 @@ FIXED_WINDOW = 20     # Fixed: T-20 to T+20
 
 # ------------------- RUN ANALYSIS -------------------
 if st.sidebar.button("Run Analysis"):
-
     if not selected_industry:
         st.error("Please select at least one industry.")
         st.stop()
