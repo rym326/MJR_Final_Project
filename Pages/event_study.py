@@ -48,17 +48,6 @@ industry_map = {
 BENCHMARK = "SPY"
 FIXED_WINDOW = 20     # Fixed: T-20 to T+20
 
-# --------------------------------------------------------------
-# HOME PAGE
-# --------------------------------------------------------------
-if mode == "Home":
-    st.title("Natural Disaster Impact on U.S. Utility Industries")
-    st.write("""
-        This dashboard explores **how different utility-related industries reacted to major U.S. natural disasters**.
-        Select a disaster + industry to analyze returns around the event date.
-    """)
-    st.write("---")
-
     # ------------------- INDUSTRY SELECT -------------------
     selected_industry = st.sidebar.multiselect(
         "Which industry do you want to visualize?",
