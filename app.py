@@ -2,9 +2,16 @@
 
 import streamlit as st
 
+st.set_page_config(
+    page_title="Natural Disaster Event Study",
+    layout="wide",
+    initial_sidebar_state="expanded"     # ← THIS EXPANDS SIDEBAR ON STARTUP
+)
+
+
 st.set_page_config(layout="wide", page_title="Utility Industry Event Study")
 
-st.title("🌪️ Natural Disaster Impact on U.S. Utility Industries")
+st.title("Natural Disaster Impact on U.S. Utility Industries")
 
 st.write("""
 Welcome to our final project dashboard!
