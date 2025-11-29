@@ -4,6 +4,17 @@ import yfinance as yf
 import datetime as dt
 import altair as alt
 
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+        }
+        header {visibility: hidden;}   /* removes Streamlit top bar */
+    </style>
+""", unsafe_allow_html=True)
+
+
 # --------------------------------------------------------------
 # NATURAL DISASTERS + DATES  
 # (with emojis instead of confirm dropdown hack)

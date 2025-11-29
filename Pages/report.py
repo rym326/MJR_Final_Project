@@ -1,5 +1,16 @@
 import streamlit as st
 
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+        }
+        header {visibility: hidden;}   /* removes Streamlit top bar */
+    </style>
+""", unsafe_allow_html=True)
+
+
 # Show the report page
 def show_report():
     st.title("Final Report & Conclusions")

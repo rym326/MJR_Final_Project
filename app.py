@@ -2,6 +2,17 @@
 
 import streamlit as st
 
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 0rem !important;
+            padding-bottom: 0rem !important;
+        }
+        header {visibility: hidden;}   /* removes Streamlit top bar */
+    </style>
+""", unsafe_allow_html=True)
+
+
 st.set_page_config(
     page_title="Natural Disaster Impact Dashboard",
     layout="wide",
