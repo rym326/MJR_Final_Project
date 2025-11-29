@@ -9,11 +9,6 @@ import altair as alt
 st.set_page_config(layout="wide")
 
 # --------------------------------------------------------------
-# NAVIGATION
-# --------------------------------------------------------------
-mode = st.sidebar.radio("Navigation", ["Home", "Report"])
-
-# --------------------------------------------------------------
 # NATURAL DISASTERS + DATES  
 # (with emojis instead of confirm dropdown hack)
 # --------------------------------------------------------------
