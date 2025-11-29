@@ -176,7 +176,7 @@ def show_event_study():
         st.altair_chart(CAR_chart, use_container_width=True)
 
         # ------------------- POST-EVENT BARS -------------------
-        st.subheader("Post-Event Performance")
+        st.subheader("CAR Across Intervals")
         labels_needed = ["T-5", "T", "T+3", "T+10"]
         missing = [lbl for lbl in labels_needed if lbl not in industry_prices.index]
 
