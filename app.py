@@ -8,8 +8,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-st.set_page_config(layout="wide", page_title="Utility Industry Event Study")
-
 st.title("Natural Disaster Impact on U.S. Utility Industries")
 
 st.write("""
@@ -40,5 +38,3 @@ Use the sidebar to access:
 
 Let’s get started → **Go to the Event Study Dashboard in the sidebar.**
 """)
-
-st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Streamlit_logo_icon.png/1200px-Streamlit_logo_icon.png", width=200)
