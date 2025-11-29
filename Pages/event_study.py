@@ -81,8 +81,6 @@ def show_event_study():
 
     window = FIXED_WINDOW
     st.sidebar.write(f"Event window: **T-{window} to T+{window}** (fixed)")
-    normalize = st.sidebar.checkbox("Normalize to 100 at T", value=True)
-
 # ------------------- RUN ANALYSIS -------------------
     if st.sidebar.button("Run Analysis"):
         if not selected_industry:
