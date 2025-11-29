@@ -3,8 +3,6 @@
 import streamlit as st
 
 def show_report():
-    st.set_page_config(layout="wide", page_title="Findings & Conclusions")
-
     st.title("Final Report & Conclusions")
     st.write("Summary of findings based on multiple disaster–industry combinations.")
 
