@@ -8,7 +8,7 @@ st.markdown("""
     <style>
         .block-container {
             padding-top: 0rem !important;
-            padding-bottom: 0rem !important;
+            padding-bottom: 6rem !important;
         }
         header {visibility: hidden;}   /* removes Streamlit top bar */
     </style>
