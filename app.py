@@ -3,11 +3,10 @@
 import streamlit as st
 
 st.set_page_config(
-    page_title="Natural Disaster Event Study",
-    layout="wide",
-    initial_sidebar_state="expanded"     # ← THIS EXPANDS SIDEBAR ON STARTUP
+    page_title="Natural Disaster Impact Dashboard",
+    layout="centered",              # Forces sidebar to stay visible
+    initial_sidebar_state="expanded"
 )
-
 
 st.set_page_config(layout="wide", page_title="Utility Industry Event Study")
 
@@ -19,7 +18,7 @@ Welcome to our final project dashboard!
 This tool explores **how different utility-related industries react to major U.S. natural disasters**
 using an **event study** methodology.
 
-### 🔍 What You Can Do:
+### What You Can Do:
 - Analyze stock reactions **before and after** disaster events  
 - Compare utilities across **different industries**  
 - Study **Cumulative Abnormal Returns (CAR)**  
@@ -27,14 +26,14 @@ using an **event study** methodology.
 
 ---
 
-### 📌 Navigation
+### Navigation
 Use the sidebar to access:
 1. **Event Study Dashboard** – Run the analysis  
 2. **Report & Conclusions** – Summary of findings  
 
 ---
 
-### 👥 Team Members  
+### Team Members  
 - Ryan McGranahan  
 - Graham Johnston  
 - Thomas Ross  
