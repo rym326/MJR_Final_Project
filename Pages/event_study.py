@@ -148,9 +148,6 @@ def show_event_study():
         close_prices_full.index = labels
         industry_prices = close_prices_full[industry_tickers].copy()
 
-        if normalize:
-            industry_prices = (industry_prices / industry_prices.loc["T"]) * 100
-
         # ------------------- CAR -------------------
         st.subheader("Cumulative Abnormal Returns (CAR)")
         returns = close_prices_full.pct_change().dropna()
