@@ -1,21 +1,22 @@
+# app.py
+
 import streamlit as st
 
+# --- Page Setup ---
 st.set_page_config(
     page_title="Natural Disaster Impact Dashboard",
-    layout="centered",
+    layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ---------------- SIDEBAR ----------------
+# --- Sidebar Navigation ---
 st.sidebar.title("Navigation")
-page = st.sidebar.radio(
-    "Go to:",
-    ["Home", "Event Study Dashboard", "Report"]
-)
+page = st.sidebar.radio("Go to:", ["Home", "Event Study Dashboard", "Report"])
 
-# ---------------- HOME PAGE ----------------
+# --- PAGES ---
 if page == "Home":
     st.title("Natural Disaster Impact on U.S. Utility Industries")
+
     st.write("""
     Welcome to our final project dashboard!
 
@@ -29,16 +30,24 @@ if page == "Home":
     - Understand **how markets recover after disasters**
 
     ---
+
+    ### Navigation  
+    Use the sidebar to access:
+    1. **Event Study Dashboard** – Run the analysis  
+    2. **Report & Conclusions** – Summary of findings  
+
+    ---
+
     ### Team Members  
     - Ryan McGranahan  
     - Graham Johnston  
     - Thomas Ross  
     """)
 
-# ---------------- EVENT STUDY PAGE ----------------
 elif page == "Event Study Dashboard":
-    from Pages import event_study  # runs event_study.py automatically
+    # 🚨 JUST IMPORT — NO INDENT, NO EXTRA CODE
+    from Pages import event_study
 
-# ---------------- REPORT PAGE ----------------
 elif page == "Report":
+    # 🚨 JUST IMPORT — NO INDENT, NO EXTRA CODE
     from Pages import report
