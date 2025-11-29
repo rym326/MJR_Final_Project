@@ -45,9 +45,7 @@ if page == "Home":
     """)
 
 elif page == "Event Study Dashboard":
-    # 🚨 JUST IMPORT — NO INDENT, NO EXTRA CODE
     from Pages import event_study
 
 elif page == "Report":
-    # 🚨 JUST IMPORT — NO INDENT, NO EXTRA CODE
     from Pages import report
