@@ -37,8 +37,8 @@ if page == "Home":
 
 # ---------------- EVENT STUDY PAGE ----------------
 elif page == "Event Study Dashboard":
-    import event_study  # runs event_study.py automatically
+    from Pages import event_study  # runs event_study.py automatically
 
 # ---------------- REPORT PAGE ----------------
 elif page == "Report":
-    import report
+    from Pages import report
