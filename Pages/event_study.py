@@ -297,18 +297,18 @@ def show_event_study():
     for industry_name in selected_industries:
         ticker = industry_map[industry_name]
 
-        series = base_for_intervals[ticker]
-        series.index = forced_labels  # ensure correct label order
+        # FIXED — use the index from base_for_intervals
+        series = base_for_intervals[ticker].reindex(base_for_intervals.index)
 
         rows = []
         for label, window_points in interval_windows.items():
 
-            # check all points exist in index
+            # Ensure all points exist
             if not all(pt in series.index for pt in window_points):
                 st.warning(f"Not enough data for interval '{label}' for {industry_name}.")
                 continue
 
-            avg_val = series.loc[window_points].mean()   # Option B: average inside interval
+            avg_val = series.loc[window_points].mean()
             rows.append([label, avg_val])
 
         if not rows:
@@ -337,4 +337,5 @@ def show_event_study():
         )
 
         st.altair_chart(bar_chart, use_container_width=True)
+
 
