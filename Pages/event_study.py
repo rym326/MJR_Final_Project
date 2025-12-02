@@ -181,19 +181,20 @@ def show_event_study():
 
         # --- MAIN CAR LINE CHART ---
         CAR_chart = (
-            alt.Chart(ab_df)
-            .mark_line(point=True)
-            .encode(
-                x=alt.X(
-                    "T:N",
-                    sort=forced_labels,
-                    axis=alt.Axis(labelAngle=0)
-                ),
-                y=alt.Y("CAR:Q", title="Cumulative Abnormal Return (%)"),
-                color="Industry:N",
-                tooltip=["T", "Industry", "CAR"]
-            )
+        alt.Chart(ab_df)
+        .mark_line(point=True)
+        .encode(
+            x=alt.X(
+                "T:N",
+                sort=forced_labels,
+                axis=alt.Axis(labelAngle=0, title="")
+            ),
+            y=alt.Y("CAR:Q", title="Cumulative Abnormal Return (%)"),
+            color="Industry:N",
+            tooltip=["T", "Industry", "CAR"]
         )
+    )
+
 
         final_chart = (CAR_chart + event_rule).resolve_scale(x="shared", y="shared")
 
