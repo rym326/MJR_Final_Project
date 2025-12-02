@@ -170,7 +170,7 @@ def show_event_study():
 
 
         ab_df = abnormal_cum.reset_index().rename(columns={"index": "T"})
-        ab_df = ab_df.melt("", var_name="Industry", value_name="CAR")
+        ab_df = ab_df.melt("T", var_name="Industry", value_name="CAR")
 
         CAR_chart = (
             alt.Chart(ab_df)
