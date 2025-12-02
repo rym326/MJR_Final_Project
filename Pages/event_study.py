@@ -283,31 +283,39 @@ def show_event_study():
         base_for_intervals = pd.DataFrame(mean_vals, index=T_VALUES, columns=industry_tickers)
 
     # =====================================================================
-    # CHART 2: INTERVAL SUMMARY BARS (BASED ON AVERAGE CAR)
+    # CHART 2: INTERVAL SUMMARY BARS (BASED ON AVERAGE CAR INSIDE WINDOWS)
     # =====================================================================
     st.subheader("Average CAR Across Key Windows")
 
+    # Window definitions for "Option B"
+    interval_windows = {
+        "T-5 → T":      [f"T{offset:+d}" if offset != 0 else "T" for offset in range(-5, 1)],
+        "T → T+3":      [f"T{offset:+d}" if offset != 0 else "T" for offset in range(0, 4)],
+        "T → T+10":     [f"T{offset:+d}" if offset != 0 else "T" for offset in range(0, 11)],
+    }
+
     for industry_name in selected_industries:
         ticker = industry_map[industry_name]
-        series = base_for_intervals[ticker]
-        series.index = T_VALUES  # ensure index is t
 
-        # These t-values correspond to the windows
-        try:
-            pre = series.loc[0] - series.loc[-5]   # T-5 → T
-            short = series.loc[3] - series.loc[0]  # T → T+3
-            med = series.loc[10] - series.loc[0]   # T → T+10
-        except KeyError:
-            st.warning(f"Not enough data for interval breakdown for {industry_name}.")
+        series = base_for_intervals[ticker]
+        series.index = forced_labels  # ensure correct label order
+
+        rows = []
+        for label, window_points in interval_windows.items():
+
+            # check all points exist in index
+            if not all(pt in series.index for pt in window_points):
+                st.warning(f"Not enough data for interval '{label}' for {industry_name}.")
+                continue
+
+            avg_val = series.loc[window_points].mean()   # Option B: average inside interval
+            rows.append([label, avg_val])
+
+        if not rows:
             continue
 
-        perf_df = pd.DataFrame(
-            {
-                "Period": ["T-5 → T", "T → T+3", "T → T+10"],
-                "Return (%)": [pre, short, med],
-            }
-        )
-        perf_df["Color"] = perf_df["Return (%)"].apply(
+        perf_df = pd.DataFrame(rows, columns=["Period", "Average CAR (%)"])
+        perf_df["Color"] = perf_df["Average CAR (%)"].apply(
             lambda x: "green" if x >= 0 else "red"
         )
 
@@ -322,10 +330,11 @@ def show_event_study():
                     sort=["T-5 → T", "T → T+3", "T → T+10"],
                     title="Window",
                 ),
-                y=alt.Y("Return (%):Q", title="Change in CAR (percentage points)"),
+                y=alt.Y("Average CAR (%):Q", title="Average CAR (percentage points)"),
                 color=alt.Color("Color:N", scale=None, legend=None),
-                tooltip=["Period", "Return (%)"],
+                tooltip=["Period", "Average CAR (%)"],
             )
         )
 
         st.altair_chart(bar_chart, use_container_width=True)
+
