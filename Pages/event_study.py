@@ -59,7 +59,7 @@ FIXED_WINDOW = 20     # Fixed: T-20 to T+20
 # HOME PAGE
 # --------------------------------------------------------------
 def show_event_study():
-    st.title("Natural Disaster Impact on U.S. Utility Industries")
+    st.title("Natura Disaster Impact on U.S. Utility Industries")
     st.write("""
         This dashboard explores **how different utility-related industries reacted to major U.S. natural disasters**.
         Select a disaster + industry to analyze returns around the event date.
