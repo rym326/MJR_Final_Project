@@ -158,7 +158,6 @@ def show_event_study():
         industry_prices = close_prices_full[industry_tickers].copy()
 
         # ------------------- CAR -------------------
-        # ------------------- CAR -------------------
         st.subheader("Cumulative Abnormal Returns (CAR)")
 
         # Keep all labels T-20 ... T+20 by filling the first NaN return with 0
@@ -168,21 +167,36 @@ def show_event_study():
         abnormal = returns[industry_tickers].sub(benchmark_returns, axis=0)
         abnormal_cum = abnormal.cumsum() * 100
 
-
         ab_df = abnormal_cum.reset_index().rename(columns={"index": "T"})
         ab_df = ab_df.melt("T", var_name="Industry", value_name="CAR")
+
+        # Event-day red rule
+        event_rule = alt.Chart(pd.DataFrame({"T": ["T"]})).mark_rule(
+            color="red",
+            strokeDash=[4,4],
+            strokeWidth=2
+        ).encode(
+            x="T:N"
+        )
 
         CAR_chart = (
             alt.Chart(ab_df)
             .mark_line(point=True)
             .encode(
-                x=alt.X("T:N", sort=None, axis=alt.Axis(labelAngle=0)),
+                x=alt.X(
+                    "T:N",
+                    sort=forced_labels,         # <-- fixes duplicate label bug
+                    axis=alt.Axis(labelAngle=0)
+                ),
                 y=alt.Y("CAR:Q", title="Cumulative Abnormal Return (%)"),
                 color="Industry:N",
                 tooltip=["T", "Industry", "CAR"]
             )
         )
-        st.altair_chart(CAR_chart, use_container_width=True)
+
+        final_chart = CAR_chart + event_rule
+
+        st.altair_chart(final_chart, use_container_width=True)
 
         # ------------------- POST-EVENT BARS -------------------
         st.subheader("CAR Across Intervals")
