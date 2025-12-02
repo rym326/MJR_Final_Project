@@ -289,10 +289,11 @@ def show_event_study():
 
     # Window definitions for "Option B"
     interval_windows = {
-        "T-5 → T":      [f"T{offset:+d}" if offset != 0 else "T" for offset in range(-5, 1)],
-        "T → T+3":      [f"T{offset:+d}" if offset != 0 else "T" for offset in range(0, 4)],
-        "T → T+10":     [f"T{offset:+d}" if offset != 0 else "T" for offset in range(0, 11)],
+        "T-5 → T": list(range(-5, 1)),        # -5, -4, -3, -2, -1, 0
+        "T → T+3": list(range(0, 4)),         # 0, 1, 2, 3
+        "T → T+10": list(range(0, 11)),       # 0 → 10
     }
+
 
     for industry_name in selected_industries:
         ticker = industry_map[industry_name]
@@ -304,7 +305,7 @@ def show_event_study():
         for label, window_points in interval_windows.items():
 
             # Ensure all points exist
-            if not all(pt in series.index for pt in window_points):
+            if not all(pt in series.index.tolist() for pt in window_points):
                 st.warning(f"Not enough data for interval '{label}' for {industry_name}.")
                 continue
 
