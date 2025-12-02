@@ -1,40 +1,42 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import yfinance as yf
 import datetime as dt
 import altair as alt
 
-st.markdown("""
+# --------------------------------------------------------------
+# GLOBAL STYLING (tightens top padding, hides default header)
+# --------------------------------------------------------------
+st.markdown(
+    """
     <style>
         .block-container {
             padding-top: 0rem !important;
             padding-bottom: 6rem !important;
         }
-        header {visibility: hidden;}   /* removes Streamlit top bar */
+        header {visibility: hidden;}
     </style>
-""", unsafe_allow_html=True)
-
+    """,
+    unsafe_allow_html=True,
+)
 
 # --------------------------------------------------------------
-# NATURAL DISASTERS + DATES  
-# (with emojis instead of confirm dropdown hack)
+# NATURAL DISASTERS + DATES
 # --------------------------------------------------------------
 disaster_events = {
     # Hurricanes
     "Hurricane Ida (Aug 29, 2021)": "2021-08-29",
     "Hurricane Harvey (Aug 25, 2017)": "2017-08-25",
     "Hurricane Irma (Sep 10, 2017)": "2017-09-10",
-
-    # ❄ Winter Storms
+    # Winter Storms
     "Texas Winter Storm (Feb 13, 2021)": "2021-02-13",
     "Winter Storm Elliott (Dec 21, 2022)": "2022-12-21",
     "Winter Storm Jonas (Jan 22, 2016)": "2016-01-22",
-
     # Wildfires
     "California Wildfires Start (Aug 14, 2020)": "2020-08-14",
     "Camp Fire California (Nov 8, 2018)": "2018-11-08",
     "Dixie Fire California (Jul 13, 2021)": "2021-07-13",
-
     # Floods
     "Louisiana Flooding (Aug 12, 2016)": "2016-08-12",
     "Midwest Flooding (Mar 14, 2019)": "2019-03-14",
@@ -53,182 +55,291 @@ industry_map = {
 }
 
 BENCHMARK = "SPY"
-FIXED_WINDOW = 20     # Fixed: T-20 to T+20
+FIXED_WINDOW = 20  # T-20 to T+20
+
+
+def _fetch_event_car(event_label, tickers, forced_labels):
+    """
+    Helper:
+    For a single event, download data, cut to T-20..T+20 around event,
+    compute CAR for each ticker vs benchmark.
+    Returns:
+        abnormal_cum : DataFrame (index=forced_labels, columns=tickers)
+        or None if data not usable.
+    """
+    event_date = pd.to_datetime(disaster_events[event_label])
+
+    # Ask for a larger calendar window to guarantee enough trading days
+    start_dt = event_date - dt.timedelta(days=FIXED_WINDOW * 2)
+    end_dt = event_date + dt.timedelta(days=FIXED_WINDOW * 2)
+
+    data = yf.download(tickers, start=start_dt, end=end_dt, progress=False)
+    if data.empty:
+        return None
+
+    close_prices = data["Close"].dropna(how="all")
+    trading_dates = close_prices.index
+
+    # Find nearest trading day to the calendar event date
+    event_index = trading_dates.get_indexer([event_date], method="nearest")[0]
+
+    start_slice = event_index - FIXED_WINDOW
+    end_slice = event_index + FIXED_WINDOW
+
+    # Require full window – otherwise skip this event
+    if start_slice < 0 or end_slice >= len(trading_dates):
+        return None
+
+    window_prices = close_prices.iloc[start_slice : end_slice + 1].copy()
+    window_prices.index = forced_labels  # label T-20..T+20
+
+    # Returns, abnormal returns, CAR
+    returns = window_prices.pct_change().fillna(0.0)
+    benchmark_returns = returns[BENCHMARK]
+    abnormal = returns[tickers].sub(benchmark_returns, axis=0)
+    abnormal_cum = abnormal.cumsum() * 100  # percent
+
+    return abnormal_cum
+
 
 # --------------------------------------------------------------
-# HOME PAGE
+# MAIN PAGE FUNCTION
 # --------------------------------------------------------------
 def show_event_study():
     st.title("Natural Disaster Impact on U.S. Utility Industries")
-    st.write("""
-        This dashboard explores **how different utility-related industries reacted to major U.S. natural disasters**.
-        Select a disaster + industry to analyze returns around the event date.
-    """)
+    st.write(
+        """
+        This dashboard explores how different utility-related industries reacted to major U.S. natural disasters
+        using an event study methodology.
+
+        You can now select **multiple disasters** and view the **average Cumulative Abnormal Return (CAAR)**
+        across those events, or overlay each event's CAR separately.
+        """
+    )
     st.write("---")
 
-    # ------------------- INDUSTRY SELECT -------------------
-    selected_industry = st.sidebar.multiselect(
-        "Which industry do you want to visualize?",
+    # ---------- SIDEBAR CONTROLS ----------
+    selected_industries = st.sidebar.multiselect(
+        "Select Industries:",
         options=list(industry_map.keys()),
         default=["Electric Utilities"],
     )
 
-    # ------------------- SINGLE STREAMLIT DROPDOWN (NO CONFIRMATION) -------------------
-    selected_disaster = st.sidebar.selectbox(
-        "Select a Natural Disaster",
-        list(disaster_events.keys())
+    selected_disasters = st.sidebar.multiselect(
+        "Select One or More Natural Disasters:",
+        options=list(disaster_events.keys()),
+        default=["Hurricane Ida (Aug 29, 2021)"],
     )
 
-    window = FIXED_WINDOW
-    st.sidebar.write(f"Event window: **T-{window} to T+{window}** (fixed)")
-# ------------------- RUN ANALYSIS -------------------
-    if st.sidebar.button("Run Analysis"):
-        if not selected_industry:
-            st.error("Please select at least one industry.")
-            st.stop()
+    if not selected_industries:
+        st.sidebar.warning("Select at least one industry.")
+    if not selected_disasters:
+        st.sidebar.warning("Select at least one disaster.")
 
-        st.subheader(f"**{selected_disaster}**")
+    chart_mode = st.sidebar.radio(
+        "How do you want to visualize the events?",
+        ["Average across events (CAAR)", "Show each event separately (CAR)"],
+        index=0,
+    )
 
-        # Convert event date
-        event_dt = pd.to_datetime(disaster_events[selected_disaster])
+    st.sidebar.write(f"Event window: **T-{FIXED_WINDOW} to T+{FIXED_WINDOW}**")
 
-        # Request much larger window so we guarantee enough trading days
-        start_dt = event_dt - dt.timedelta(days=FIXED_WINDOW * 2)   # 20 x 2 = 40 days before
-        end_dt = event_dt + dt.timedelta(days=FIXED_WINDOW * 2)     # 40 days after
+    if not (selected_industries and selected_disasters):
+        return
 
-        # Tickers to fetch
-        industry_tickers = [industry_map[i] for i in selected_industry]
-        all_tickers = list(set(industry_tickers + [BENCHMARK]))
+    if not st.sidebar.button("Run Analysis"):
+        return
 
-        # Download data
-        data = yf.download(all_tickers, start=start_dt, end=end_dt, progress=False)
+    # ---------- PREP COMMON OBJECTS ----------
+    # T-20 .. T+20
+    forced_labels = [
+        f"T{offset:+d}" if offset != 0 else "T"
+        for offset in range(-FIXED_WINDOW, FIXED_WINDOW + 1)
+    ]
 
-        if data.empty:
-            st.error("⚠ No data available for this event. Try another industry or disaster.")
-            st.stop()
+    # Map industries -> tickers and reverse
+    industry_tickers = [industry_map[i] for i in selected_industries]
+    ticker_to_industry = {v: k for k, v in industry_map.items()}
 
-        # Use closing prices only
-        close_prices_full = data["Close"].dropna(how="all")
+    all_tickers = list(set(industry_tickers + [BENCHMARK]))
 
-        # -------------------------
-        # FORCE EXACT T-10 → T+10 TRADING WINDOW
-        # -------------------------
+    # ---------- LOOP OVER EVENTS, COLLECT CAR ----------
+    event_car_dict = {}
+    skipped = []
 
-        trading_dates = close_prices_full.index
-        event_index = trading_dates.get_indexer([event_dt], method="nearest")[0]
+    for event_label in selected_disasters:
+        abnormal_cum = _fetch_event_car(event_label, all_tickers, forced_labels)
+        if abnormal_cum is None:
+            skipped.append(event_label)
+            continue
+        # Keep only industry tickers
+        event_car_dict[event_label] = abnormal_cum[industry_tickers]
 
-        # Desired index range around the event
-        start_slice = event_index - FIXED_WINDOW
-        end_slice   = event_index + FIXED_WINDOW
+    if skipped:
+        st.warning(
+            "The following events were skipped due to insufficient or missing data:\n- "
+            + "\n- ".join(skipped)
+        )
 
-        # CHECK if enough data exists — if not, warn user
-        if start_slice < 0 or end_slice >= len(trading_dates):
-            st.warning(
-                f"⚠ Only {event_index} trading days available before T — showing available range."
-            )
-            start_slice = max(0, start_slice)
-            end_slice   = min(len(trading_dates) - 1, end_slice)
+    if not event_car_dict:
+        st.error("No usable events after filtering. Try different selections.")
+        return
 
-        # Apply final slice
-        close_prices_full = close_prices_full.iloc[start_slice:end_slice + 1]
+    # =====================================================================
+    # CHART 1: CAAR OR MULTI-EVENT CAR
+    # =====================================================================
 
-        # OPTIONAL — Show user what window they actually got
-        first_label = close_prices_full.index[0]
-        last_label = close_prices_full.index[-1]
+    if chart_mode == "Average across events (CAAR)":
+        st.subheader(
+            f"Average Cumulative Abnormal Return (CAAR) across {len(event_car_dict)} event(s)"
+        )
 
-        # ------------------- T-LABELING -------------------
-        trading_dates = close_prices_full.index
-        event_index = trading_dates.get_indexer([event_dt], method="nearest")[0]
+        # Stack [events, T-window, industries] and average over events
+        stacked = np.stack(
+            [df.values for df in event_car_dict.values()], axis=0
+        )  # shape (E, 41, num_industries)
+        mean_vals = np.nanmean(stacked, axis=0)  # shape (41, num_industries)
 
-        # Force exactly T-20 to T+20 labels even if data rows < 41
-        forced_labels = [f"T{offset:+d}" if offset != 0 else "T" 
-                        for offset in range(-FIXED_WINDOW, FIXED_WINDOW+1)]
+        caar_wide = pd.DataFrame(
+            mean_vals, index=forced_labels, columns=industry_tickers
+        )
 
-        # If actual data shorter, pad with NaN rows so chart stays aligned
-        needed_rows = len(forced_labels) - close_prices_full.shape[0]
-        if needed_rows > 0:
-            pad_df = pd.DataFrame([[float('nan')] * close_prices_full.shape[1]], 
-                                index=[None] * needed_rows)
-            close_prices_full = pd.concat([close_prices_full, pad_df], axis=0)
+        # Long format with human-readable industry names
+        caar_long = (
+            caar_wide.reset_index()
+            .rename(columns={"index": "T"})
+            .melt("T", var_name="Ticker", value_name="CAR")
+        )
+        caar_long["Industry"] = caar_long["Ticker"].map(ticker_to_industry)
 
-        # Trim to exactly 41 rows
-        close_prices_full = close_prices_full.iloc[:len(forced_labels)]
-        close_prices_full.index = forced_labels
-
-        industry_prices = close_prices_full[industry_tickers].copy()
-
-        # ------------------- CAR -------------------
-        st.subheader("Cumulative Abnormal Returns (CAR)")
-
-        # Keep all labels T-20 ... T+20 by filling the first NaN return with 0
-        returns = close_prices_full.pct_change().fillna(0)
-
-        benchmark_returns = returns[BENCHMARK]
-        abnormal = returns[industry_tickers].sub(benchmark_returns, axis=0)
-        abnormal_cum = abnormal.cumsum() * 100
-
-        ab_df = abnormal_cum.reset_index().rename(columns={"index": "T"})
-        ab_df = ab_df.melt("T", var_name="Industry", value_name="CAR")
-
-        # --- EVENT DAY RED DOTTED LINE ---
+        # Red vertical line at T
         event_rule = alt.Chart(pd.DataFrame({"T": ["T"]})).mark_rule(
-            color="red",
-            strokeDash=[4,4],
-            strokeWidth=2
-        ).encode(
-            x=alt.X("T:N", sort=forced_labels)
+            color="red", strokeDash=[4, 4], strokeWidth=2
+        ).encode(x="T:N")
+
+        caar_chart = (
+            alt.Chart(caar_long)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X(
+                    "T:N",
+                    sort=forced_labels,
+                    axis=alt.Axis(labelAngle=0, title=""),
+                ),
+                y=alt.Y(
+                    "CAR:Q",
+                    title="Average Cumulative Abnormal Return (%)",
+                ),
+                color=alt.Color("Industry:N", title="Industry"),
+                tooltip=["T", "Industry", "CAR"],
+            )
         )
 
-        # --- MAIN CAR LINE CHART ---
-        CAR_chart = (
-        alt.Chart(ab_df)
-        .mark_line(point=True)
-        .encode(
-            x=alt.X(
-                "T:N",
-                sort=forced_labels,
-                axis=alt.Axis(labelAngle=0, title="")
-            ),
-            y=alt.Y("CAR:Q", title="Cumulative Abnormal Return (%)"),
-            color="Industry:N",
-            tooltip=["T", "Industry", "CAR"]
+        st.altair_chart(caar_chart + event_rule, use_container_width=True)
+
+        base_for_intervals = caar_wide
+
+    else:
+        # Show each event separately
+        st.subheader(
+            f"Cumulative Abnormal Returns (CAR) for {len(event_car_dict)} event(s)"
         )
-    )
 
+        # Build long dataframe: one row per (T, Industry, Event)
+        long_rows = []
+        for event_label, df in event_car_dict.items():
+            temp = (
+                df.reset_index()
+                .rename(columns={"index": "T"})
+                .melt("T", var_name="Ticker", value_name="CAR")
+            )
+            temp["Industry"] = temp["Ticker"].map(ticker_to_industry)
+            temp["Event"] = event_label
+            long_rows.append(temp)
 
-        final_chart = (CAR_chart + event_rule).resolve_scale(x="shared", y="shared")
+        all_events_long = pd.concat(long_rows, ignore_index=True)
 
-        st.altair_chart(final_chart, use_container_width=True)
+        event_rule = alt.Chart(pd.DataFrame({"T": ["T"]})).mark_rule(
+            color="red", strokeDash=[4, 4], strokeWidth=2
+        ).encode(x="T:N")
 
-        # ------------------- POST-EVENT BARS -------------------
-        st.subheader("CAR Across Intervals")
-        labels_needed = ["T-5", "T", "T+3", "T+10"]
-        missing = [lbl for lbl in labels_needed if lbl not in industry_prices.index]
+        # Color by industry, differentiate events by strokeDash
+        car_chart = (
+            alt.Chart(all_events_long)
+            .mark_line(point=True)
+            .encode(
+                x=alt.X(
+                    "T:N",
+                    sort=forced_labels,
+                    axis=alt.Axis(labelAngle=0, title=""),
+                ),
+                y=alt.Y("CAR:Q", title="Cumulative Abnormal Return (%)"),
+                color=alt.Color("Industry:N", title="Industry"),
+                strokeDash=alt.StrokeDash(
+                    "Event:N",
+                    legend=alt.Legend(title="Event"),
+                ),
+                tooltip=["T", "Industry", "Event", "CAR"],
+            )
+        )
 
-        if missing:
-            st.warning(f"Not enough data: {', '.join(missing)}")
-        else:
-            for industry in selected_industry:
-                ticker = industry_map[industry]
-                pre = industry_prices.loc["T", ticker] - industry_prices.loc["T-5", ticker]
-                short = industry_prices.loc["T+3", ticker] - industry_prices.loc["T", ticker]
-                med = industry_prices.loc["T+10", ticker] - industry_prices.loc["T", ticker]
+        st.altair_chart(car_chart + event_rule, use_container_width=True)
 
-                perf_df = pd.DataFrame({
-                    "Period": ["T-5 → T", "T → T+3", "T → T+10"],
-                    "Return (%)": [pre, short, med]
-                })
-                perf_df["Color"] = perf_df["Return (%)"].apply(lambda x: "green" if x >= 0 else "red")
+        # For interval summary below, use the *average* across events
+        stacked = np.stack(
+            [df.values for df in event_car_dict.values()], axis=0
+        )
+        mean_vals = np.nanmean(stacked, axis=0)
+        base_for_intervals = pd.DataFrame(
+            mean_vals, index=forced_labels, columns=industry_tickers
+        )
 
-                st.write(f"### {industry}")
-                bar_chart = (
-                    alt.Chart(perf_df)
-                    .mark_bar()
-                    .encode(
-                        x=alt.X("Period:N", sort=["T-5 → T", "T → T+3", "T → T+10"]),
-                        y="Return (%):Q",
-                        color=alt.Color("Color:N", scale=None),
-                        tooltip=["Period", "Return (%)"]
-                    )
-                )
-                st.altair_chart(bar_chart, use_container_width=True)
+    # =====================================================================
+    # CHART 2: INTERVAL SUMMARY BARS (BASED ON AVERAGE CAR)
+    # =====================================================================
+    st.subheader("Average CAR Across Key Windows")
+
+    intervals = ["T-5", "T", "T+3", "T+10"]
+
+    for industry_name in selected_industries:
+        ticker = industry_map[industry_name]
+
+        series = base_for_intervals[ticker]
+        series.index = forced_labels  # ensure correct label order
+
+        if not all(i in series.index for i in intervals):
+            st.warning(f"Not enough data for interval breakdown for {industry_name}.")
+            continue
+
+        pre = series["T"] - series["T-5"]
+        short = series["T+3"] - series["T"]
+        med = series["T+10"] - series["T"]
+
+        perf_df = pd.DataFrame(
+            {
+                "Period": ["T-5 → T", "T → T+3", "T → T+10"],
+                "Return (%)": [pre, short, med],
+            }
+        )
+        perf_df["Color"] = perf_df["Return (%)"].apply(
+            lambda x: "green" if x >= 0 else "red"
+        )
+
+        st.write(f"### {industry_name}")
+
+        bar_chart = (
+            alt.Chart(perf_df)
+            .mark_bar()
+            .encode(
+                x=alt.X(
+                    "Period:N",
+                    sort=["T-5 → T", "T → T+3", "T → T+10"],
+                    title="Window",
+                ),
+                y=alt.Y("Return (%):Q", title="Change in CAR (percentage points)"),
+                color=alt.Color("Color:N", scale=None, legend=None),
+                tooltip=["Period", "Return (%)"],
+            )
+        )
+
+        st.altair_chart(bar_chart, use_container_width=True)
