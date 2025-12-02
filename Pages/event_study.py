@@ -59,7 +59,7 @@ FIXED_WINDOW = 20     # Fixed: T-20 to T+20
 # HOME PAGE
 # --------------------------------------------------------------
 def show_event_study():
-    st.title("Natura Disaster Impact on U.S. Utility Industries")
+    st.title("Natural Disaster Impact on U.S. Utility Industries")
     st.write("""
         This dashboard explores **how different utility-related industries reacted to major U.S. natural disasters**.
         Select a disaster + industry to analyze returns around the event date.
@@ -158,11 +158,16 @@ def show_event_study():
         industry_prices = close_prices_full[industry_tickers].copy()
 
         # ------------------- CAR -------------------
+        # ------------------- CAR -------------------
         st.subheader("Cumulative Abnormal Returns (CAR)")
-        returns = close_prices_full.pct_change().dropna()
+
+        # Keep all labels T-20 ... T+20 by filling the first NaN return with 0
+        returns = close_prices_full.pct_change().fillna(0)
+
         benchmark_returns = returns[BENCHMARK]
         abnormal = returns[industry_tickers].sub(benchmark_returns, axis=0)
         abnormal_cum = abnormal.cumsum() * 100
+
 
         ab_df = abnormal_cum.reset_index().rename(columns={"index": "T"})
         ab_df = ab_df.melt("T", var_name="Industry", value_name="CAR")
