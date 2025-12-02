@@ -92,7 +92,7 @@ def show_event_study():
         # Convert event date
         event_dt = pd.to_datetime(disaster_events[selected_disaster])
 
-        # 🔥 Request MUCH larger window so we guarantee enough trading days
+        # Request much larger window so we guarantee enough trading days
         start_dt = event_dt - dt.timedelta(days=FIXED_WINDOW * 2)   # 20 x 2 = 40 days before
         end_dt = event_dt + dt.timedelta(days=FIXED_WINDOW * 2)     # 40 days after
 
@@ -140,12 +140,21 @@ def show_event_study():
         trading_dates = close_prices_full.index
         event_index = trading_dates.get_indexer([event_dt], method="nearest")[0]
 
-        labels = []
-        for i in range(len(trading_dates)):
-            offset = i - event_index
-            labels.append("T" if offset == 0 else f"T{offset:+d}")
+        # Force exactly T-20 to T+20 labels even if data rows < 41
+        forced_labels = [f"T{offset:+d}" if offset != 0 else "T" 
+                        for offset in range(-FIXED_WINDOW, FIXED_WINDOW+1)]
 
-        close_prices_full.index = labels
+        # If actual data shorter, pad with NaN rows so chart stays aligned
+        needed_rows = len(forced_labels) - close_prices_full.shape[0]
+        if needed_rows > 0:
+            pad_df = pd.DataFrame([[float('nan')] * close_prices_full.shape[1]], 
+                                index=[None] * needed_rows)
+            close_prices_full = pd.concat([close_prices_full, pad_df], axis=0)
+
+        # Trim to exactly 41 rows
+        close_prices_full = close_prices_full.iloc[:len(forced_labels)]
+        close_prices_full.index = forced_labels
+
         industry_prices = close_prices_full[industry_tickers].copy()
 
         # ------------------- CAR -------------------
