@@ -1,3 +1,15 @@
+import streamlit as st
+
+st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 0rem !important;
+            padding-bottom: 6rem !important;
+        }
+        header {visibility: hidden;}
+    </style>
+""", unsafe_allow_html=True)
+
 def show_report():
     st.title("Event Study Report: Utility Industry Reactions to Major U.S. Natural Disasters")
 
