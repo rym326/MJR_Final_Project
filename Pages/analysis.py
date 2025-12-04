@@ -25,7 +25,6 @@ def show_analysis():
     Hurricanes generate the strongest volatility for Solar and Oil & Gas, while regulated utilities remain resilient.
     """)
 
-    st.markdown("**Hurricane CAAR Chart (Insert Screenshot Below)**")
     st.image("Pages/images/Hurricane.png")  # Replace or delete as needed
     st.markdown("---")
 
@@ -42,7 +41,6 @@ def show_analysis():
     Extreme cold exerts broad downward pressure on utilities while creating rebound opportunities for Oil & Gas through increased heating demand.
     """)
 
-    st.markdown("**Winter Storm CAAR Chart (Insert Screenshot Below)**")
     st.image("Pages/images/winterstorm.png")
     st.markdown("---")
 
@@ -60,7 +58,6 @@ def show_analysis():
     Wildfires appear to strengthen renewable-energy sentiment while weakening expectations for fossil fuel firms.
     """)
 
-    st.markdown("**Wildfire CAAR Chart (Insert Screenshot Below)**")
     st.image("Pages/images/Wildfire.png")
     st.markdown("---")
 
@@ -77,7 +74,6 @@ def show_analysis():
     Flood-related shocks are either temporary or already priced in, resulting in the smallest abnormal movements across industries.
     """)
 
-    st.markdown("**Flood CAAR Chart (Insert Screenshot Below)**")
     st.image("Pages/images/flood.png")
     st.markdown("---")
 
