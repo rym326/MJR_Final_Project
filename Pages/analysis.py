@@ -61,7 +61,7 @@ def show_analysis():
     """)
 
     st.markdown("**Wildfire CAAR Chart (Insert Screenshot Below)**")
-    st.image("Pages/images/wildfire.png")
+    st.image("Pages/images/Wildfire.png")
     st.markdown("---")
 
     # ----------------------------------------------------------------------
