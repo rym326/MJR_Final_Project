@@ -26,7 +26,7 @@ def show_analysis():
     """)
 
     st.markdown("**Hurricane CAAR Chart (Insert Screenshot Below)**")
-    st.image("images/Hurricane.png")  # Replace or delete as needed
+    st.image("Pages/images/Hurricane.png")  # Replace or delete as needed
     st.markdown("---")
 
     # ----------------------------------------------------------------------
@@ -43,7 +43,7 @@ def show_analysis():
     """)
 
     st.markdown("**Winter Storm CAAR Chart (Insert Screenshot Below)**")
-    st.image("images/winterstorm.png")
+    st.image("Pages/images/winterstorm.png")
     st.markdown("---")
 
     # ----------------------------------------------------------------------
@@ -61,7 +61,7 @@ def show_analysis():
     """)
 
     st.markdown("**Wildfire CAAR Chart (Insert Screenshot Below)**")
-    st.image("images/wildfire.png")
+    st.image("Pages/images/wildfire.png")
     st.markdown("---")
 
     # ----------------------------------------------------------------------
@@ -78,7 +78,7 @@ def show_analysis():
     """)
 
     st.markdown("**Flood CAAR Chart (Insert Screenshot Below)**")
-    st.image("images/flood.png")
+    st.image("Pages/images/flood.png")
     st.markdown("---")
 
     # ----------------------------------------------------------------------
