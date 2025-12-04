@@ -21,7 +21,7 @@ st.set_page_config(
 
 # Sidebar Navigation
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to:", ["Home", "Event Study Dashboard", "Report", "Analysis"])
+page = st.sidebar.radio("Go to:", ["Home", "Event Study Dashboard", "Methodology", "Analysis"])
 
 
 # -------------------- HOME PAGE --------------------
@@ -43,8 +43,9 @@ using an event study methodology.
 
 ### Navigation  
 Use the sidebar to access:
-1. Event Study Dashboard – Run the analysis  
-2. Report & Conclusions – Summary of findings  
+1. Event Study Dashboard – Run the analysis 
+2. Methodology – Processes involved in event study
+3. Analysis – Summary of findings  
 
 ---
 
@@ -62,7 +63,7 @@ elif page == "Event Study Dashboard":
 
 
 # -------------------- REPORT PAGE --------------------
-elif page == "Report":
+elif page == "Methodology":
     from Pages.report import show_report
     show_report()
 
