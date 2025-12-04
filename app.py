@@ -65,3 +65,9 @@ elif page == "Event Study Dashboard":
 elif page == "Report":
     from Pages.report import show_report
     show_report()
+
+# -------------------- Analysis PAGE --------------------
+elif page == "Analysis":
+    from Pages.analysis import show_analysis
+    show_analysis()
+
