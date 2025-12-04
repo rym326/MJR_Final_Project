@@ -29,13 +29,10 @@ MJR_Final_Project/
 │   └── report.py              # Written conclusions and takeaways
 │
 ├── images/                    # Exported figures for presentation
-│   ├── Hurricane.png
-│   ├── Wildfire.png
-│   ├── Winterstorm.png
-│   └── Flood.png
-│
-└── Presentation/
-    └── Final_Presentation.pdf
+    ├── Hurricane.png
+    ├── Wildfire.png
+    ├── Winterstorm.png
+    └── Flood.png
 ```
 
 ---
