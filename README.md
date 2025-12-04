@@ -86,10 +86,7 @@ Contains:
 
 ---
 
-## Presentation Materials
-
-Final class presentation slides:  
-`Presentation/Final_Presentation.pdf`
+## Additional Materials
 
 Supporting charts used in the slides:  
 `/images/`
