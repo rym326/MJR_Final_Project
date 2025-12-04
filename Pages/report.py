@@ -14,7 +14,7 @@ def show_report():
     st.title("Event Study Report: Utility Industry Reactions to Major U.S. Natural Disasters")
 
     st.markdown("""
-    ## 1. Introduction
+    ## Introduction
     This report analyzes how U.S. utility-related industries react to major natural disasters using an event-study 
     framework. Instead of examining individual firms, the analysis focuses on sector-level ETFs:
 
@@ -31,7 +31,7 @@ def show_report():
 
     ---
 
-    ## 2. Calculating Abnormal (Excess) Returns
+    ## Calculating Abnormal (Excess) Returns
     Daily percentage returns are computed for each ETF and the benchmark:
 
     ```python
@@ -50,7 +50,7 @@ def show_report():
 
     ---
 
-    ## 3. Constructing the Event Window (T−20 to T+20)
+    ## Constructing the Event Window (T−20 to T+20)
     For each disaster:
     - The event date is converted to a timestamp  
     - Price data around the date is downloaded  
@@ -69,7 +69,7 @@ def show_report():
 
     ---
 
-    ## 4. Cumulative Abnormal Returns (CAR)
+    ## Cumulative Abnormal Returns (CAR)
     CAR aggregates daily abnormal returns:
 
     ```python
@@ -89,7 +89,7 @@ def show_report():
 
     ---
 
-    ## 5. Short-Horizon Return Comparisons (T to T+10)
+    ## Short-Horizon Return Comparisons (T to T+10)
     The dashboard also computes short-horizon price differences without smoothing or interpolation:
 
     ```python
@@ -107,7 +107,7 @@ def show_report():
 
     ---
 
-    ## 6. Dashboard Interaction Overview
+    ## Dashboard Interaction Overview
     Users may:
     - Select industries  
     - Select one or multiple disasters  
