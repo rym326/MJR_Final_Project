@@ -119,7 +119,5 @@ def show_report():
     - **Narrative summaries** for interpretation  
 
     Each selection regenerates all charts dynamically.
-
-    ---
     """
     )
